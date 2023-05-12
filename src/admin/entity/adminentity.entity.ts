@@ -15,6 +15,7 @@ export class AdminEntity
 
     @Column()
     email: string;
+    
 
     @Column()
     password: string;

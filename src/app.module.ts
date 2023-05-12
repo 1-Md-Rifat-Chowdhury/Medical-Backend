@@ -3,33 +3,35 @@ import { AdminModule } from './admin/module/adminmodule.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { AdminController } from './admin/controller/admin.controller';
 
 
 @Module
 (
   {
     imports: 
-    [AdminModule, TypeOrmModule.forRoot
+    [
+      AdminModule, TypeOrmModule.forRoot
       (
         {
-          type:            'postgres',
-          host:            'localhost',
-          port:             5432,
-          username:        'postgres',
-          password:        'root',
-          database:        'Medical',
-          autoLoadEntities: true,
-          synchronize:      true,
+          type:'postgres',
+          host:'localhost',
+          port:5432,
+          username:'postgres',
+          password:'root',
+          database:'Medical',
+          autoLoadEntities:true,
+          synchronize:true,
         }
       ),
 
-      ServeStaticModule.forRoot
-      (
-        {
-          rootPath: join(__dirname, '..','../public'),
-          serveRoot: '/public'
-        }
-      ),
+      // ServeStaticModule.forRoot
+      // (
+      //   {
+      //     rootPath: join(__dirname, '..','../public'),
+      //     serveRoot: '/public'
+      //   }
+      // ),
     
     
     ],

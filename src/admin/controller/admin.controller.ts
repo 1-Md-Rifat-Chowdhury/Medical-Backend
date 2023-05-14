@@ -1,11 +1,13 @@
-import { Body, Controller, Delete, FileTypeValidator, Get, MaxFileSizeValidator, Param, ParseFilePipe, ParseIntPipe, Post, Put, Query,Session,UploadedFile,UseGuards,UseInterceptors, UsePipes, ValidationPipe } from "@nestjs/common";
+import { Body, Controller, Delete, FileTypeValidator, Get, MaxFileSizeValidator, Param, ParseFilePipe, ParseIntPipe, Post, Put, Query,Res,Session,UnauthorizedException,UploadedFile,UseGuards,UseInterceptors, UsePipes, ValidationPipe } from "@nestjs/common";
 import { AdminService } from "../service/adminservice.service";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { diskStorage } from "multer";
 import { AdminForm } from "../dto/adminform.dto";
 import { SessionGuard } from "../guard/SessionGuard";
-import session from "express-session";
 import { AdminFormUpdate } from "../dto/adminformUpdate.dto";
+import { DoctorForm } from "src/doctor/dto/doctor.dto";
+import { DoctorService } from "src/doctor/service/doctor.service";
+
 
 
 
@@ -14,7 +16,8 @@ export class AdminController
 {
     constructor
     (
-        private adminService:AdminService
+        private adminService:AdminService,
+        private doctorService: DoctorService,
     ){}
 
 
@@ -51,11 +54,11 @@ export class AdminController
         }
 
 
-        // Post crud opration ( create, insert)
+    // Post crud opration ( create, insert)
 
         @Post('/insertadmin')
 
-        
+
         @UseInterceptors
         (FileInterceptor
             (
@@ -90,7 +93,7 @@ export class AdminController
 
 
 
-        // Put crud operation (update, change, edit)
+    // Put crud operation (update, change, edit)
 
         @Put('/updateadmin')
         @UseGuards(SessionGuard)
@@ -112,7 +115,7 @@ export class AdminController
         }
         
 
-        // Delete crud operation (Remove, delete)
+    // Delete crud operation (Remove, delete)
 
         @Delete('/deleteadmin/:id')
         deleteadminbyid(@Param('id', ParseIntPipe) id:number):any
@@ -120,7 +123,111 @@ export class AdminController
             return this.adminService.deleteUserbyid(id);
         }
 
+        @Post('/insertdoctor')
+        @UsePipes(new ValidationPipe())
+        insertDoctor(@Body() doctordto:DoctorForm):any{
+
+            return this.doctorService.insertDoctor(doctordto)
+        }
+
+        @Get('/finddoctorsbyadmin/:id')
+        getDoctorByAdminID(@Param('id',ParseIntPipe)id:number):any
+        {
+            return this.adminService.getDoctorsByAdminID(id);
+
+        }
+
+        @Get('/getimage/:name')
+        getImages(@Param('name')name, @Res() res)
+        { res.sendFile(name,{root:'./uploads'})
+
+        }
+
+        @Get('/findadminbydoctor/:id')
+        getAdminByDoctorID(@Param('id',ParseIntPipe)id:number):any
+        {
+            return this.doctorService.getAdminByDoctorID(id);
+        }
+    
+
+    //Sign Up
+
+        @Post('/signup')
+        @UseInterceptors(FileInterceptor('myfile',
+        {storage:diskStorage(
+            {destination:'./uploads', filename: function(req,file,cb)
+              {
+                 cb(null,Date.now()+file.originalname)
+
+              }
+            }
+        )
+        }
+        )
+        )
+
+        signup(@Body() mydto:AdminForm, 
+        @UploadedFile( new ParseFilePipe(
+            {validators:
+        [
+        new MaxFileSizeValidator({maxSize:160000}),
+        new FileTypeValidator ({ fileType: 'png|jpg|jpeg|'}),                
+        ]
+            }),
+
+        )
+        
+        file:Express.Multer.File
+        )
+        
+        {
+         mydto.filename =file.fieldname;
+         console.log(mydto)
+         return this.adminService.signup(mydto);
+        }
+
+
+        @Post('/signin')
+        @UsePipes(new ValidationPipe())
+        async signin(@Session() session,@Body() mydto:AdminForm)
+        {
+            const res = await(this.adminService.signup(mydto));
+            if(res== true)
+
+            {
+                session.email=mydto.email;
+                return(session.email);
+
+            }
+            else
+            {
+                throw new UnauthorizedException({message : " Something Error "});
+
+            }
+
+        }
+
+        @Get('/signout')
+        signout(@Session() session)
+        {
+            if(session.destroy())
+            {
+                return { message: "you are logged out"};
+
+            }
+            else 
+            {
+                throw new UnauthorizedException("Error action");
+
+            }
+
+        }
+
+        @Post('/sendmail')
+        sendEmail(@Body() mydata){
+            return this.adminService.sendEmail(mydata)
+        }
+
 
 }
-
 

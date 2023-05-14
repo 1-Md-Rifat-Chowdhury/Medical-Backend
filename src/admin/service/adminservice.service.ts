@@ -4,6 +4,7 @@ import { AdminEntity } from "../entity/adminentity.entity";
 import { Repository } from "typeorm";
 import * as bcrypt from 'bcrypt';
 import { AdminFormUpdate } from "../dto/adminformUpdate.dto";
+import { MailerService } from "@nestjs-modules/mailer";
 
 
 @Injectable()
@@ -12,7 +13,8 @@ export class AdminService
     constructor
     (
         @InjectRepository(AdminEntity)
-        private adminRepo: Repository<AdminEntity>
+        private adminRepo: Repository<AdminEntity>,
+        private mailerService: MailerService
     ){}
 
 
@@ -71,8 +73,58 @@ export class AdminService
         return this.adminRepo.delete(id);
     }
 
+    getDoctorsByAdminID(id):any{
+        return this.adminRepo.find({
+            where:{id:id},
+            relations:{
+                doctors:true,
 
+            },
+        });
+    }
 
+    async signup(mydto)
+    {
+        const salt =await bcrypt.genSalt();
+        const hassedpassed =await bcrypt.hash(mydto.password,salt);
+        mydto.password = hassedpassed;
+        return this.adminRepo.save(mydto);
+
+    }
+
+    async signin(mydto)
+    {
+        if(mydto.email !=null && mydto.password !=null)
+        {
+            const mydata =await this.adminRepo.findOneBy({email:mydto.email});
+            const isMatch=await bcrypt.compare(mydto.password, mydata.password);
+
+            if (isMatch)
+            {
+                return true;
+
+            }
+
+            else{
+                return false;
+
+            }
+
+        }
+        else{
+            return false;
+        }
+    }
+
+    async sendEmail(mydata){
+        return await this.mailerService.sendMail({
+            to:mydata.email,
+            subject: mydata.subject,
+
+            text:mydata.text,
+
+        });
+    }
 
 
 }

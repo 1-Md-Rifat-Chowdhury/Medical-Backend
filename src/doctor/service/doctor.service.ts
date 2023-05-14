@@ -8,21 +8,24 @@ import { DoctorForm } from "../dto/doctor.dto";
 @Injectable()
 export class DoctorService
 {
-    constructor(
+    constructor( 
+        
         @InjectRepository(DoctorEntity)
         private doctorRepo: Repository<DoctorEntity>,
     ){}
 
 
-    inserDoctor(mydto:DoctorForm):any
+    insertDoctor(mydto:DoctorForm):any
     {
         return this.doctorRepo.save(mydto);
 
     }
 
-    getAdminByDoctor(id):any
+    getAdminByDoctorID(id):any
     {
         return this.doctorRepo.find({where: {id:id}, relations:{admin:true,},});
     }
+
+    
 
 }

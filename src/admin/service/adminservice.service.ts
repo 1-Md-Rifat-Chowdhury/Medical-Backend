@@ -3,6 +3,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { AdminEntity } from "../entity/adminentity.entity";
 import { Repository } from "typeorm";
 import * as bcrypt from 'bcrypt';
+import { AdminFormUpdate } from "../dto/adminformUpdate.dto";
 
 
 @Injectable()
@@ -51,6 +52,26 @@ export class AdminService
         mydto.password = hassedpassed;
         return this.adminRepo.save(mydto);
     }
+
+    updateUser(name,email):any
+    {
+        return this.adminRepo.update({email:email},{name:name});
+
+
+    }
+
+    updateUserbyid(mydto:AdminFormUpdate,id):any
+    {
+        return this.adminRepo.update(id,mydto);
+
+    }
+
+    deleteUserbyid(id):any
+    {
+        return this.adminRepo.delete(id);
+    }
+
+
 
 
 

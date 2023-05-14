@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { DoctorEntity } from "src/doctor/entity/doctor.entity";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 
 
@@ -25,6 +26,9 @@ export class AdminEntity
 
     @Column()
     filename : string;
+
+    @OneToMany(() => DoctorEntity,(doctor) => doctor. admin)
+    doctors: DoctorEntity[]
 
     
 }

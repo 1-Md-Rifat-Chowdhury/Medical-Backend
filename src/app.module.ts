@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { AdminController } from './admin/controller/admin.controller';
+import { DoctorModule } from './doctor/module/doctor.module';
 
 
 @Module
@@ -11,7 +12,7 @@ import { AdminController } from './admin/controller/admin.controller';
   {
     imports: 
     [
-      AdminModule, TypeOrmModule.forRoot
+      AdminModule,DoctorModule, TypeOrmModule.forRoot
       (
         {
           type:'postgres',
@@ -25,13 +26,13 @@ import { AdminController } from './admin/controller/admin.controller';
         }
       ),
 
-      // ServeStaticModule.forRoot
-      // (
-      //   {
-      //     rootPath: join(__dirname, '..','../public'),
-      //     serveRoot: '/public'
-      //   }
-      // ),
+      ServeStaticModule.forRoot
+      (
+        {
+          rootPath: join(__dirname, '..','../public'),
+          serveRoot: '/public'
+        }
+      ),
     
     
     ],
